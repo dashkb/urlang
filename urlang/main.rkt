@@ -46,8 +46,9 @@
          object label lambda λ let ref require sempty sif throw topblock try urmodule
          var while :=)
 (provide bit-and bit-not bit-or bit-xor ===)
-;; Compiler 
+;; Compiler
 (provide compile          ; syntax -> *         prints JavaScript
+         urlang->string   ; syntax -> string    compiles and returns js as a string
          eval)            ; syntax -> string    compiles, saves, runs
 ;                                                                - output returned as string
 ;; Compiler Phases
@@ -2093,6 +2094,14 @@
               (parse u)
               u))))))))
   (if emit? (emit t) t))
+
+(define (-urlang->string u)
+  (with-output-to-string
+    (thunk*
+     (compile u))))
+
+(define-syntax-rule (urlang->string body ...)
+  (-urlang->string #'(urmodule anonymous-module body ...)))
 
 (define (expand u)
   (unparse-Lur (parse u)))
