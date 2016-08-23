@@ -57,12 +57,12 @@
 (provide parse            ; syntax -> L      parse and expand syntax object into L
          flatten-topblock ; L      -> L      remove topblock (in Racket this is top-level-begin)
          desugar          ; L      -> L-     remove optional arguments
-         annotate-module  ; L-     -> L0     annotate module with exports, imports, funs and vars 
+         annotate-module  ; L-     -> L0     annotate module with exports, imports, funs and vars
          annotate-bodies  ; L0     -> L1     annotate bodies with local variables
          α-rename         ; L1     -> L1     make all variable names unique
          generate-code    ; L1     -> tree   make tree of JavaScript
          emit)            ; tree   -> *      print tree to standard output port
-;; Macros 
+;; Macros
 (provide define-urlang-macro          ; (define-urlang-macro name transformer)
          macro-expansion-context      ; returns one of 'module-level, 'statement, 'expression
          macros-ht) ; internal
@@ -73,7 +73,7 @@
          Datum Fixnum String Symbol
          ;; Expressions
          Application Assignment Id Let Sequence Ternary
-         ;; Statements         
+         ;; Statements
          Block If While DoWhile)
 ;; Languages
 (provide         Lur         L-         L0         L1
@@ -144,14 +144,14 @@
 
 ;; Example (cond-macro and array)
 
-;; SYNTAX (cond [e0 e1 e2 ...] ... [else en]), 
-;;   like Racket cond except there is no new scope 
+;; SYNTAX (cond [e0 e1 e2 ...] ... [else en]),
+;;   like Racket cond except there is no new scope
 
 ; The urlang macro transformer is an standard (phase 0) Racket function.
 
 ; (begin
 ;   (define-urlang-macro cond
-;     (λ (stx)   
+;     (λ (stx)
 ;       (syntax-parse stx
 ;         [(_cond [else e0:Expr e:Expr ...])
 ;          #'(begin e0 e ...)]
@@ -194,7 +194,7 @@
 ;; that compiles an urlang module and produces JavaScript,
 ;; that can be evaluated by the Node.js platform (or be embedded in a web page).
 
-;; The Urlang module to be compiled can be represented 
+;; The Urlang module to be compiled can be represented
 ;;    1) as a syntax object
 ;;    2) as a Nanopass structure (representing an Lurlang program)
 
@@ -318,7 +318,7 @@
 ;;;
 
 ;    (ref e0 e1)     becomes  e0[e1]
-;    (ref e0 "str")  becomes  e0.str    
+;    (ref e0 "str")  becomes  e0.str
 ;    (array e ...)   becomes  [e,...]
 
 ;    (dot e ...)     is property access / chained method calls
@@ -365,7 +365,7 @@
 
 (define (map2* f xs ρ)
   ; f : α β -> (values α β)
-  ; map f over xs while threading the seconding value  
+  ; map f over xs while threading the seconding value
   (define (f* xs ρ)
     (match xs
       ['()         (values '() ρ)]
@@ -472,7 +472,7 @@
   '(break case
           ; class
           catch const continue debugger
-          default 
+          default
           delete do else export extends finally for function if import in instanceof let
           new return
           ; super ; HACK temporarily allow (import ... super ...)
@@ -518,7 +518,7 @@
   (Module (u)
     (urmodule mn m ...))
   (ModuleLevelForm (m)
-    (export  x ...)        
+    (export  x ...)
     (import  x ...)              ; declare that x ... are declared (builtin or required from Node)
     (import-from js-mn is ...)   ; ES6:   import {is ...} from the module named js-mn (string literal)
     (require rs ...)             ; import from modules compiled by urlang
@@ -533,7 +533,7 @@
     (default x)              ; the default export as x
     (as x1 x2)               ; the member x1 using the name x2 locally
     (all-as x)               ; import all using the name x
-    x)                       ; the member named x             
+    x)                       ; the member named x
   (Definition (δ)
     (define (f φ ...) b)     ; function definition
     (define x e))
@@ -609,9 +609,9 @@
 
 (define-syntax-class ModuleName
   #:description "<module-name>"
-  (pattern (~or mn:Symbol mn:String)))  
+  (pattern (~or mn:Symbol mn:String)))
 
-(define-syntax-class Keyword 
+(define-syntax-class Keyword
   #:literal-sets (keywords)
   (pattern x:identifier
            #:fail-unless (keyword? #'x) "keyword"))
@@ -1134,7 +1134,7 @@
       [[x:Id e]  `[,#'x ,(parse-expr #'e)]])))
 
 
-      
+
 (define (parse-body b)
   (debug (list 'parse-body (syntax->datum b)))
   (with-output-language (Lur Body)
@@ -1376,7 +1376,7 @@
         [(import   ,x ...)            (add-form m) '()]
         [(require  ,rs ...)           (add-form m) '()]
         [(import-from ,js-mn ,is ...) (add-form m) '()]
-        [(topblock ,m ...)            (append-map flatten m)]        
+        [(topblock ,m ...)            (append-map flatten m)]
         [,δ                           (list δ)]
         [,σ                           (list σ)])))
   (Statement  : Statement  (σ) ->  Statement ())
@@ -1420,7 +1420,7 @@
                              `(sif (app ,#'= ,x ,#'undefined)
                                    (:= ,x ,e)
                                    (empty)))))])))
-  (Statement  : Statement  (σ) ->  Statement ())  
+  (Statement  : Statement  (σ) ->  Statement ())
   (Expr       : Expr       (e) ->  Expr ()
     [(lambda (,φ* ...) ,b)
      (match (for/list ([φ (in-list φ*)])
@@ -1452,7 +1452,7 @@
 
 
 ;;;
-;;; URLANG ANNOTATED MODULE 
+;;; URLANG ANNOTATED MODULE
 ;;;
 
 (define-language L0 (extends L-)  ; L-
@@ -1523,7 +1523,7 @@
     (define-free-table  import)
     (define-free-table  fun)
     (define-bound-table var)
-    (define-free-table  operator)   ; operators 
+    (define-free-table  operator)   ; operators
     (define-free-table  reserved)   ; reserved words
     (define-free-table  predefined) ; predefined names
     (define require-specs '())
@@ -1579,7 +1579,7 @@
     [(as ,x1 ,x2) (import! x2) `(as ,x1 ,x2)]
     [(all-as ,x)  (import! x)  `(all-as ,x)]
     [,x           (import! x)  `,x])
-  
+
   ;; Register variables declared with var only, when var is a module-level form.
   ;; All contexts where var-forms can appear need to change the context.
   ;; I.e. function bodies, let and lambda needs to set the context.
@@ -1594,7 +1594,7 @@
     ; let and lambda have bodies, so they need special attention
     [(let ((,x ,e) ...) ,b)   (let ([e (parameterize ([context 'rhs])  (map Expr e))]
                                     [b (parameterize ([context 'body]) (Body b))])
-                                `(let ((,x ,e) ...) ,b))]                                
+                                `(let ((,x ,e) ...) ,b))]
     [(lambda (,x ...) ,b)     (let ([b (parameterize ([context 'body]) (Body b))])
                                 `(lambda (,x ...) ,b))])
   (Definition : Definition (δ) ->  Definition ()
@@ -1609,7 +1609,7 @@
                                 (let ((b (Body b)))
                                   `(define (,f ,x0 ...) ,b)))])
   (Body : Body (b) -> Body ())
-  
+
   (Module U))
 
 
@@ -1719,7 +1719,7 @@
     ; module-level-definitions aren't renamed
     [(define ,x ,e)              (let ((ρ (extend ρ x x))) ; map x to x
                                    (let ((e (Expr e ρ)))
-                                     `(define ,x ,e)))]    
+                                     `(define ,x ,e)))]
     [(define (,f ,x ...) ,ab)    (letv ((x ρ) (rename* x ρ))
                                    (let ([ab (AnnotatedBody ab ρ)])
                                      `(define (,f ,x ...) ,ab)))])
@@ -1731,7 +1731,7 @@
   (AnnotatedBody : AnnotatedBody (b ρ) -> AnnotatedBody ()
     [(annotated-body (,x ...) ,σ ... ,e)
      (parameterize ([pre-body-ρ ρ]) ; need to rename (var ...)
-       (letv ((y ρ) (rename* x ρ))  ; extend and rename       ;  NOTE: This means that (var ...) 
+       (letv ((y ρ) (rename* x ρ))  ; extend and rename       ;  NOTE: This means that (var ...)
          (let ((σ (Statement* σ ρ)) (e (Expr e ρ)))           ;        should not rename again
            `(annotated-body (,y ...) ,σ ... ,e))))])
   (Statement : Statement (σ ρ) -> Statement ()
@@ -1766,12 +1766,12 @@
                                              (let* ((σ  (Statement* σ  ρ))
                                                     (σ0 (Statement* σ0 ρ)))
                                                `(catch-finally ,x (,σ ...) (,σ0 ...))))])
-                            
+
   ; Expression never change the environment, so only a single return value
   (Expr : Expr (e ρ) -> Expr ()
     ; all expressions that contain an id (x or f) needs consideration
     [,x                         (lookup x ρ unbound-error)]
-    [(:= ,x ,[e])               (let ((y (lookup x ρ unbound-error))) `(:= ,y ,e))]    
+    [(:= ,x ,[e])               (let ((y (lookup x ρ unbound-error))) `(:= ,y ,e))]
     [(let ((,x ,[e]) ...) ,ab)  (letv ((x ρ) (rename* x ρ))  ; map x to x
                                   (let ([ab (AnnotatedBody ab ρ)])
                                     `(let ((,x ,e) ...) ,ab)))]
@@ -1782,7 +1782,7 @@
     ; TODO Fix this hack:
     ; HACK BEGINS
     ; The hack is related to the Racket-to-Urlang compiler.
-    ; Racket apply has a surprising expansion.    
+    ; Racket apply has a surprising expansion.
     (define kernel:srcloc (expand-syntax #'srcloc)) ; expands to kernel:srcloc
     (global! kernel:srcloc)
     (global! (expand-syntax #'apply))               ; expands to new-apply-proc
@@ -1792,7 +1792,7 @@
     (global! #'unsafe-fx+)
     (global! #'unsafe-fx-)
     (global! #'unsafe-fx*)
-    (global! (second (syntax->list (expand-syntax (datum->syntax #'here '(in-range 10))))))    
+    (global! (second (syntax->list (expand-syntax (datum->syntax #'here '(in-range 10))))))
     ; HACK ENDS
     ; Also we need else to be know for use in macros
     (Module U)))
@@ -1827,7 +1827,7 @@
       (nanopass-case (L1 Expr) e
         [(lambda (,x* ...) ,ab)
          (list pn (~parens (~commas x*)) (AnnotatedBody ab))]))
-    
+
     (define (exports.id x)   (format-id x "exports.~a" x))
     (define current-js-import-module-name (make-parameter #f))
     (define jsmn current-js-import-module-name))
@@ -1859,7 +1859,7 @@
            (list (~newline (~Statement `(var "MODULE = require(\"./" ,mn.js "\")")))
                  (for/list ([x imports])
                    (let ([x (mangle (datum->syntax #'ignored x))]) ; mangle expects ids (not symbols)
-                     (~newline (~Statement `(var ,x ,(~a " = MODULE[\"" x "\"]"))))))))])    
+                     (~newline (~Statement `(var ,x ,(~a " = MODULE[\"" x "\"]"))))))))])
   (ModuleLevelForm : ModuleLevelForm (m) -> * ()
     [(import-from ,js-mn ,is* ...) (parameterize ([current-js-import-module-name js-mn])
                                      (map ImportSpec  is*))]
@@ -1872,7 +1872,7 @@
                                                 " from " (~string (jsmn)))))]
     [(all-as ,x)    (~newline (~Statement (list "import " '*  " as " x " from " (~string (jsmn)))))]
     [(default ,x)   (~newline (~Statement (list "import " x " from " (~string (jsmn)))))]
-    [,x             (~newline (~Statement (list "import " (~braces x) " from " (~string (jsmn)))))])  
+    [,x             (~newline (~Statement (list "import " (~braces x) " from " (~string (jsmn)))))])
   (Definition : Definition (δ) -> * ()
     [(define ,x ,e)            (let ([e (Expr e)])
                                  (~Statement `(var ,x "=" ,e)))]
@@ -1920,7 +1920,7 @@
                             [(list (list xs es) ...)
                              (~Statement
                               `(var ,(~commas (for/list ([x xs] [e es])
-                                                (if e (list x "=" e) x)))))])])  
+                                                (if e (list x "=" e) x)))))])])
   (VarBinding : VarBinding (vb) -> * ()
     [,x              (list x #f)]
     [(binding ,x ,e) (list x (Expr e))])
@@ -1976,7 +1976,7 @@
                            ; (displayln (map Expr (list* e0 e1 e)))
                            (match (map Expr (list* e0 e1 e))
                              [(list e0 (and (? pn?) (app pn? pn)))
-                              (cond 
+                              (cond
                                 [(and (identifier? e0) (identifier? pn)) (~a (mangle e0) "." pn)]
                                 [(identifier? pn)                        (list e0 "." (~a pn))]
                                 [else                                    (list e0 (~brackets pn))])]
@@ -2039,7 +2039,7 @@
   (define substitutions
     (make-hash '(#;("_"."__")
                  ("-"."_")  ("+"."_a") ("*"."_m") ("/"."_q")
-                 ("?"."_p") ("!"."_e") (":"."_c") 
+                 ("?"."_p") ("!"."_e") (":"."_c")
                  ("=" . "_eq") (">" . "_g") ("<" . "_l"))))
   (string-join (for/list ([c (~a orig)])
                  (hash-ref substitutions (~a c) (~a c))) ""))
@@ -2049,7 +2049,7 @@
     (error 'mangle (~a "expected identifier, got " id)))
   ; DISABLE (define id* (rename-id id))
   ; (displayln (list "  " 'mangle 'id (syntax-e id) 'id* (syntax-e id*)))
-  ; (set! id id*)  
+  ; (set! id id*)
   (syntax-parse id
     #:literals (and or not = === bit-and bit-or bit-xor bit-not < > <= >= + - * / void null)
     ;; Take care of JavaScript operators first
@@ -2080,9 +2080,9 @@
 
 ;;;
 ;;;
-;;; 
+;;;
 
-(define (compile u [emit? #t])  
+(define (compile u [emit? #t])
   (define t
     (generate-code
      (α-rename
@@ -2270,8 +2270,8 @@
            (define-values (tree exports)
              (parameterize ([current-exports '()])
                (values (compile #'urmod #f) (current-exports)))) ; #f = don't emit
-           ;; Emit to either file.es6 (if Babel is used) or file.js 
-           (define out-path (if (current-urlang-babel?) es6-path js-path))           
+           ;; Emit to either file.es6 (if Babel is used) or file.js
+           (define out-path (if (current-urlang-babel?) es6-path js-path))
            (parameterize ([current-urlang-output-file out-path])
              (with-output-to-file out-path
                (λ () (emit tree))
